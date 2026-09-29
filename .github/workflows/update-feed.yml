@@ -1,17 +1,18 @@
 name: Update Prom stock feed (daily)
 
 on:
-  # Ручний запуск кнопкою "Run workflow" на вкладці Actions (зручно для тесту)
+  # Manual run via the "Run workflow" button on the Actions tab (handy for testing)
   workflow_dispatch: {}
-  # Щоденний автозапуск.
-  # ВАЖЛИВО: GitHub Actions працює за UTC і не має "плаваючого" часового
-  # поясу. 03:00 UTC відповідає ~06:00 за київським часом влітку (EEST,
-  # UTC+3) і ~05:00 взимку (EET, UTC+2). Якщо потрібна точність до хвилини
-  # цілий рік, дивіться README.md ("Про точний час запуску").
+  # Daily automatic run.
+  # NOTE: GitHub Actions schedules run in UTC and don't account for
+  # daylight saving time. 03:00 UTC is roughly 06:00 Kyiv time in summer
+  # (EEST, UTC+3) and roughly 05:00 in winter (EET, UTC+2). If you need
+  # minute-perfect accuracy year-round, see README.md ("About the exact
+  # run time").
   schedule:
     - cron: "0 3 * * *"
 
-# Дозволяємо workflow'у самому робити commit у репозиторій
+# Lets the workflow commit changes back to the repository itself
 permissions:
   contents: write
 
@@ -19,24 +20,24 @@ jobs:
   build-feed:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout репозиторію
+      - name: Check out the repository
         uses: actions/checkout@v4
 
-      - name: Встановити Python
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Встановити залежності
+      - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Сформувати файл наявності/залишків (без ціни)
+      - name: Build the stock/availability file (no price)
         run: python merge_feeds.py --mode stock --output docs/merged_feed.xml
 
-      - name: Закомітити оновлений файл
+      - name: Commit the updated file
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add docs/merged_feed.xml
-          git diff --staged --quiet || git commit -m "Автооновлення залишків $(date -u '+%Y-%m-%d %H:%M UTC')"
+          git diff --staged --quiet || git commit -m "Auto-update stock $(date -u '+%Y-%m-%d %H:%M UTC')"
           git push
