@@ -1,0 +1,42 @@
+name: Update Prom stock feed (daily)
+
+on:
+  # Ручний запуск кнопкою "Run workflow" на вкладці Actions (зручно для тесту)
+  workflow_dispatch: {}
+  # Щоденний автозапуск.
+  # ВАЖЛИВО: GitHub Actions працює за UTC і не має "плаваючого" часового
+  # поясу. 03:00 UTC відповідає ~06:00 за київським часом влітку (EEST,
+  # UTC+3) і ~05:00 взимку (EET, UTC+2). Якщо потрібна точність до хвилини
+  # цілий рік, дивіться README.md ("Про точний час запуску").
+  schedule:
+    - cron: "0 3 * * *"
+
+# Дозволяємо workflow'у самому робити commit у репозиторій
+permissions:
+  contents: write
+
+jobs:
+  build-feed:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout репозиторію
+        uses: actions/checkout@v4
+
+      - name: Встановити Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Встановити залежності
+        run: pip install -r requirements.txt
+
+      - name: Сформувати файл наявності/залишків (без ціни)
+        run: python merge_feeds.py --mode stock --output docs/merged_feed.xml
+
+      - name: Закомітити оновлений файл
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/merged_feed.xml
+          git diff --staged --quiet || git commit -m "Автооновлення залишків $(date -u '+%Y-%m-%d %H:%M UTC')"
+          git push
