@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<yml_catalog date="2026-09-29 08:55">
+<yml_catalog date="2026-09-29 09:44">
   <shop>
     <name>My store</name>
     <company>My store</company>
@@ -3902,7 +3902,7 @@
       </offer>
       <offer id="1721529536" available="true">
         <name>Мультишпатель 15 в 1 строительный *68* Hardy из нержавеющей стали</name>
-        <quantity_in_stock>5</quantity_in_stock>
+        <quantity_in_stock>4</quantity_in_stock>
       </offer>
       <offer id="1721529537" available="true">
         <name>Гладилка Hardy *25* из нержавеющей стали 28 x 13 см, зубчатая 8 x 8 мм</name>
